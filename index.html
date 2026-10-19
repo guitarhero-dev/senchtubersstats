@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Топ СенчТуберов: Аналитика и Рейтинг 🏆</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --up: #2e7d32;
+            --down: #d32f2f;
+            --neutral: #757575;
+            --bg: #f4f6f8;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 25px 15px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        /* Карточки суммарной статистики */
+        .stats-overview {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            max-width: 1100px;
+            margin: 0 auto 20px auto;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            text-align: center;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .stat-card .title {
+            font-size: 13px;
+            color: #777;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-card .val {
+            font-size: 22px;
+            font-weight: bold;
+            color: #222;
+            margin-top: 5px;
+        }
+
+        /* Кнопки управления */
+        .controls {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .controls button {
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 10px 18px;
+            margin: 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .controls button.active {
+            background-color: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .controls button:hover:not(.active) {
+            background-color: #eee;
+        }
+
+        .controls button.refresh-btn {
+            background-color: #1976D2;
+            color: #fff;
+            border-color: #1976D2;
+        }
+
+        .controls button.refresh-btn:hover {
+            background-color: #1565C0;
+        }
+
+        /* Таблица */
+        .table-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: center;
+            border-bottom: 1px solid #edf0f2;
+        }
+
+        th {
+            background-color: #fafbfc;
+            color: #555;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .place {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
+
+        /* Бейджи динамики ранга */
+        .rank-change {
+            font-size: 12px;
+            font-weight: bold;
+            padding: 3px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .rank-up {
+            color: var(--up);
+            background-color: #e8f5e9;
+        }
+
+        .rank-down {
+            color: var(--down);
+            background-color: #ffebee;
+        }
+
+        .rank-neutral {
+            color: var(--neutral);
+            background-color: #f5f5f5;
+        }
+
+        /* Канал и ссылка */
+        .channel-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .channel-link {
+            font-weight: 600;
+            color: #1976D2;
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+
+        .channel-link:hover {
+            color: #0d47a1;
+            text-decoration: underline;
+        }
+
+        /* Доли и коэффициенты */
+        .stat-subtext {
+            font-size: 11px;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        .diff-tag {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .diff-up { color: var(--up); }
+        .diff-down { color: var(--down); }
+
+        .activity {
+            font-weight: 600;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 13px;
+            display: inline-block;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 15px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🏆 Рейтинг и Аналитика СенчТуберов 🏆</h1>
+
+<div class="stats-overview" id="overview-cards" style="display: none;">
+    <div class="stat-card">
+        <div class="title">Всего каналов</div>
+        <div class="val" id="total-channels">0</div>
+    </div>
+    <div class="stat-card">
+        <div class="title">Всего подписчиков</div>
+        <div class="val" id="total-subs">0</div>
+    </div>
+    <div class="stat-card">
+        <div class="title">Всего просмотров</div>
+        <div class="val" id="total-views">0</div>
+    </div>
+</div>
+
+<div class="controls">
+    <button id="btn-subs" class="active" onclick="setSort('subscribers')">По подписчикам</button>
+    <button id="btn-views" onclick="setSort('views')">По просмотрам</button>
+    <button id="btn-ratio" onclick="setSort('viewsPerSub')">По вовлеченности (Вью/Саб)</button>
+    <button class="refresh-btn" onclick="fetchData(true)">🔄 Обновить (Новый замер)</button>
+</div>
+
+<div class="table-container">
+    <table id="channels-table">
+        <thead>
+            <tr>
+                <th>Место</th>
+                <th>Динамика</th>
+                <th style="text-align: left;">Канал</th>
+                <th>Подписчики (Доля)</th>
+                <th>Просмотры</th>
+                <th>Просмотры / Саб</th>
+                <th>Активность</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<div id="status">Загрузка данных...</div>
+
+<script>
+    const API_KEYS = [
+        'AIzaSyDsvv2EdXisle8pzMgQQXVew3PcWCalVlQ',
+        'AIzaSyBsdeRiCkYacOFr2kbBo5PuawhKsSMSiV4',
+        'AIzaSyDkYfl4Me4sXvTYcqZmyCJ_WdJVEm_Zi_4',
+        'AIzaSyAY2NVUmn_974FgHGlq82b9p7V-05znqtA',
+        'AIzaSyBYmlf5BO6q4jNBu82v77v2q2hapCWMd7A'
+    ];
+
+    let currentKeyIndex = 0;
+    const CACHE_KEY = 'yt_analytics_cache_data';
+    const PREV_SNAPSHOT_KEY = 'yt_analytics_prev_snapshot';
+    const CACHE_TTL_MS = 15 * 60 * 1000; // 15 минут
+
+    const channels = {
+        'Сенчоус': 'UC9pEvXRytKXy5tbBQ33w9xA',
+        'Зезь': 'UCABZZloVcsmdVlb8tyZ96vg',
+        'Квикс': 'UCOInFvAOYXn-0oJ3eXnt12w',
+        'Фитер': 'UC7CA6wl42_WSDlIIagnN0Ag',
+        'Дрик': 'UCyGGcEcKkAtaQfvHq4duqYQ',
+        'Читось': 'UC1d91iuZNVgMDK5bQwPz25w',
+        'Фоксиндерит': 'UCuekTyYI7oBjMJI96cbCPag',
+        'Хев': 'UC_u9gYlaS8iNT9tC6YLb5ag',
+        'Гентликс': 'UCYfTJwq_Ue84uxYwCK8Nu8w',
+        'Декстиус': 'UCLbFhyK5aoLeYyq3rVf0I6Q',
+        'Закосерс': 'UCMV0mG038Xn-JyU-D_acSjg',
+        'Абдристиш': 'UCkOweH3yHZJUHbtwr8m5cCA',
+        'Димонский': 'UC16F7wwl54t22AeHYw-kG3w',
+        'Пельмень': 'UC3Dfci0ktbSnyzCivJtCJxg',
+        'Пунч': 'UC68HPp8yLmM7bxBHsg_r2uQ',
+        'Мамонт': 'UCFMpb9sPA6feCRaQQEBnwZQ',
+        'Кринжи': 'UCJAM7gTRJEO-ZBpx7G2tRVA',
+        'Грапхиус': 'UCNAoP7yuxaU9thXR0e_VQHg',
+        'Сеарбоак': 'UCW2PoNvP7eJjRKH-MNwUwNA',
+        'Еха': 'UCdHN3Om8qHSJwxchjaxj0ZQ',
+        'Фертин': 'UCdryFJxQoobuEuMNp0PoICg',
+        'Мэйтон': 'UCrd1Ovj9lVr3FM6xBsPjGZQ',
+        'Чипстерз': 'UCuw6sMuZ3zZbXhHfHin_bgw',
+        'Флобд': 'UCvhwOuPNHFBrUybRYc2ySMw',
+        'Ленч': 'UCz-v4ecb-kDGZ_bE3zk2sNw',
+        'Дасуг': 'UCzljkUHMgS-MBCwio2q_O_g',
+        'Валерийгло': 'UCaY3GumJJDOysFf82THdIAA',
+        'Кофи': 'UCMRMbR62_XUhGLEPU55GGuQ',
+        'Чоус': 'UCVoYhWOgi_cZ4hBvZIk6Eyg',
+        'Тилек': 'UCpNHbLRsiUxSzRNZ4xyQNqg',
+        'Фазик': 'UCgAzEZsgnKXuePmYPyV88iQ',
+        'Фантось': 'UC9ReWJun9PZIFtmBZmn9P5w',
+        'Рекч': 'UCk82qJdSJBfTPWleqWa7aJA',
+        'Абобусик': 'UC_Ht_Ia7dj63IIs4b2ZP4WA',
+        'Олег Бебрович': 'UCcWAV9aEJ9ADvTtDbAnoecw'
+    };
+
+    let channelsData = null;
+    let prevData = null;
+    let currentSortBy = 'subscribers';
+
+    async function fetchWithRetry(urlBuilder) {
+        let attempts = 0;
+        const maxRetries = API_KEYS.length;
+
+        while (attempts < maxRetries) {
+            const key = API_KEYS[currentKeyIndex];
+            const url = urlBuilder(key);
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 403 || response.status === 400) {
+                        const errorReason = data.error?.errors?.[0]?.reason || '';
+                        if (['quotaExceeded', 'dailyLimitExceeded', 'rateLimitExceeded'].includes(errorReason)) {
+                            console.warn(`[!] Квота исчерпана для ключа ${key}. Пробуем следующий...`);
+                            currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+                            attempts++;
+                            continue;
+                        }
+                    }
+                    throw new Error(data.error?.message || `Ошибка: ${response.status}`);
+                }
+                return data;
+            } catch (err) {
+                if (attempts >= maxRetries - 1) throw err;
+                currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+                attempts++;
+            }
+        }
+        throw new Error("Все API ключи исчерпали дневную квоту.");
+    }
+
+    function getActivityColor(days) {
+        if (days === null) return 'hsl(0, 0%, 70%)';
+        const hue = Math.max(0, Math.min(120, 120 - (120 * days / 90)));
+        return `hsl(${hue}, 100%, 38%)`;
+    }
+
+    function getActivityText(days) {
+        if (days === null) return 'Нет видео';
+        if (days === 0) return 'Сегодня';
+        if (days === 1) return 'Вчера';
+        if (days < 7) return `${days} дн. назад`;
+        if (days < 30) return `${Math.floor(days / 7)} нед. назад`;
+        if (days < 365) return `${Math.floor(days / 30)} мес. назад`;
+        return `${Math.floor(days / 365)} г. назад`;
+    }
+
+    async function getLastVideoDate(uploadsPlaylistId) {
+        try {
+            const data = await fetchWithRetry(key => 
+                `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=1&key=${key}`
+            );
+            if (data.items && data.items.length > 0) {
+                return new Date(data.items[0].snippet.publishedAt);
+            }
+        } catch (e) {
+            console.warn(`Не удалось получить видео для ${uploadsPlaylistId}`, e);
+        }
+        return null;
+    }
+
+    async function loadDataFromApi() {
+        const idToName = {};
+        const channelIds = [];
+        for (const [name, id] of Object.entries(channels)) {
+            idToName[id] = name;
+            channelIds.push(id);
+        }
+
+        document.getElementById('status').innerText = 'Загрузка общих метрик...';
+
+        // 1 запрос за статистикой всех 35 каналов
+        const channelListResponse = await fetchWithRetry(key => 
+            `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id=${channelIds.join(',')}&key=${key}`
+        );
+
+        const result = {};
+        const items = channelListResponse.items || [];
+        let done = 0;
+
+        document.getElementById('status').innerText = `Проверка дат последних видео (0/${items.length})...`;
+
+        const promises = items.map(async (item) => {
+            const channelId = item.id;
+            const name = idToName[channelId] || item.snippet.title;
+            const uploadsPlaylistId = item.contentDetails?.relatedPlaylists?.uploads || ('UU' + channelId.substring(2));
+
+            const lastVideoDate = await getLastVideoDate(uploadsPlaylistId);
+            let daysSince = null;
+            if (lastVideoDate) {
+                const diffTime = Math.abs(new Date() - lastVideoDate);
+                daysSince = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            }
+
+            const subs = parseInt(item.statistics?.subscriberCount || 0, 10);
+            const views = parseInt(item.statistics?.viewCount || 0, 10);
+            const viewsPerSub = subs > 0 ? (views / subs).toFixed(1) : 0;
+
+            result[channelId] = {
+                id: channelId,
+                name: name,
+                subscribers: subs,
+                views: views,
+                viewsPerSub: parseFloat(viewsPerSub),
+                thumbnail: item.snippet?.thumbnails?.default?.url || '',
+                url: `https://www.youtube.com/channel/${channelId}`,
+                last_activity: {
+                    text: getActivityText(daysSince),
+                    days: daysSince,
+                    color: getActivityColor(daysSince)
+                }
+            };
+
+            done++;
+            document.getElementById('status').innerText = `Проверка дат последних видео (${done}/${items.length})...`;
+        });
+
+        await Promise.all(promises);
+        return result;
+    }
+
+    async function fetchData(forceRefresh = false) {
+        const statusEl = document.getElementById('status');
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#666';
+
+        // Загружаем сохранённый предыдущий замер (для расчета изменений)
+        const prevSnapRaw = localStorage.getItem(PREV_SNAPSHOT_KEY);
+        if (prevSnapRaw) {
+            try { prevData = JSON.parse(prevSnapRaw); } catch(e){}
+        }
+
+        // Проверяем актуальный кэш
+        if (!forceRefresh) {
+            const cachedRaw = localStorage.getItem(CACHE_KEY);
+            if (cachedRaw) {
+                try {
+                    const parsed = JSON.parse(cachedRaw);
+                    if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
+                        channelsData = parsed.data;
+                        statusEl.style.display = 'none';
+                        renderTable();
+                        return;
+                    }
+                } catch (e) {}
+            }
+        }
+
+        try {
+            // Если мы принудительно обновляем или кэш устарел, текущий кэш сохраняем как «предыдущий замер»
+            const currentCachedRaw = localStorage.getItem(CACHE_KEY);
+            if (currentCachedRaw) {
+                try {
+                    const parsed = JSON.parse(currentCachedRaw);
+                    localStorage.setItem(PREV_SNAPSHOT_KEY, JSON.stringify(parsed.data));
+                    prevData = parsed.data;
+                } catch(e){}
+            }
+
+            channelsData = await loadDataFromApi();
+
+            // Сохраняем свежие данные
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+                timestamp: Date.now(),
+                data: channelsData
+            }));
+
+            // Если первого замера ещё не было, продублируем текущий
+            if (!prevData) {
+                prevData = channelsData;
+                localStorage.setItem(PREV_SNAPSHOT_KEY, JSON.stringify(prevData));
+            }
+
+            statusEl.style.display = 'none';
+            renderTable();
+        } catch (error) {
+            console.error('Ошибка:', error);
+            statusEl.innerText = `Ошибка при загрузке: ${error.message}`;
+            statusEl.style.color = 'red';
+        }
+    }
+
+    function setSort(by) {
+        currentSortBy = by;
+        document.querySelectorAll('.controls button').forEach(b => {
+            if (b.id !== 'refresh-btn') b.classList.remove('active');
+        });
+        const activeBtn = document.getElementById(`btn-${by === 'subscribers' ? 'subs' : by === 'views' ? 'views' : 'ratio'}`);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        renderTable();
+    }
+
+    function renderTable() {
+        if (!channelsData) return;
+
+        const tableBody = document.querySelector('#channels-table tbody');
+        tableBody.innerHTML = '';
+
+        const list = Object.values(channelsData);
+
+        // Расчет общих сумм для долей
+        const totalSubs = list.reduce((sum, ch) => sum + (ch.subscribers || 0), 0);
+        const totalViews = list.reduce((sum, ch) => sum + (ch.views || 0), 0);
+
+        // Обновляем плашки
+        document.getElementById('overview-cards').style.display = 'flex';
+        document.getElementById('total-channels').innerText = list.length;
+        document.getElementById('total-subs').innerText = Number(totalSubs).toLocaleString('ru-RU');
+        document.getElementById('total-views').innerText = Number(totalViews).toLocaleString('ru-RU');
+
+        // Вычисляем прошлые ранги при текущем типе сортировки
+        const prevRankMap = {};
+        if (prevData) {
+            const prevList = Object.values(prevData).sort((a, b) => (b[currentSortBy] || 0) - (a[currentSortBy] || 0));
+            prevList.forEach((ch, idx) => {
+                prevRankMap[ch.id] = idx + 1;
+            });
+        }
+
+        // Сортировка текущего списка
+        const sorted = [...list].sort((a, b) => (b[currentSortBy] || 0) - (a[currentSortBy] || 0));
+
+        sorted.forEach((channel, index) => {
+            const currentRank = index + 1;
+            const prevRank = prevRankMap[channel.id];
+
+            // 1. Динамика места
+            let rankBadge = `<span class="rank-change rank-neutral">—</span>`;
+            if (prevRank !== undefined) {
+                const diff = prevRank - currentRank; // если был 5, а стал 3: 5 - 3 = +2 (поднялся)
+                if (diff > 0) {
+                    rankBadge = `<span class="rank-change rank-up">▲ +${diff}</span>`;
+                } else if (diff < 0) {
+                    rankBadge = `<span class="rank-change rank-down">▼ ${diff}</span>`;
+                }
+            }
+
+            // 2. Дельта подписчиков
+            let subsDeltaHtml = '';
+            if (prevData && prevData[channel.id]) {
+                const sDiff = channel.subscribers - prevData[channel.id].subscribers;
+                if (sDiff > 0) {
+                    subsDeltaHtml = `<span class="diff-tag diff-up">+${sDiff.toLocaleString('ru-RU')}</span>`;
+                } else if (sDiff < 0) {
+                    subsDeltaHtml = `<span class="diff-tag diff-down">${sDiff.toLocaleString('ru-RU')}</span>`;
+                }
+            }
+
+            // 3. Проценты от общего топа
+            const subShare = totalSubs > 0 ? ((channel.subscribers / totalSubs) * 100).toFixed(1) : 0;
+            const viewShare = totalViews > 0 ? ((channel.views / totalViews) * 100).toFixed(1) : 0;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="place">${currentRank}</td>
+                <td>${rankBadge}</td>
+                <td>
+                    <div class="channel-cell">
+                        <a href="${channel.url}" target="_blank" rel="noopener noreferrer">
+                            <img src="${channel.thumbnail}" alt="" class="avatar" loading="lazy">
+                        </a>
+                        <div>
+                            <a href="${channel.url}" target="_blank" rel="noopener noreferrer" class="channel-link">
+                                ${channel.name} ↗
+                            </a>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div><strong>${Number(channel.subscribers).toLocaleString('ru-RU')}</strong> ${subsDeltaHtml}</div>
+                    <div class="stat-subtext">${subShare}% от всех сабов</div>
+                </td>
+                <td>
+                    <div>${Number(channel.views).toLocaleString('ru-RU')}</div>
+                    <div class="stat-subtext">${viewShare}% от всех просмотров</div>
+                </td>
+                <td>
+                    <strong>${channel.viewsPerSub}</strong>
+                </td>
+                <td>
+                    <span class="activity" style="color: ${channel.last_activity.color}">
+                        ${channel.last_activity.text}
+                    </span>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        fetchData();
+    });
+</script>
+
+</body>
+</html>
